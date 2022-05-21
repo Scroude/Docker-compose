@@ -1,0 +1,40 @@
+version: "3.1"
+services:
+  mysql:
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "slam"
+    ports:
+      - "3306:3306"
+    networks:
+      - httpdphpfpm
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      - PMA_ARBITRARY=1
+    networks:
+      - httpdphpfpm
+  phpfpm:
+    image: php:8.1-fpm
+    expose:
+      - 9000
+    volumes:
+      - ./data:/var/www/html
+    networks:
+      - httpdphpfpm
+  httpd:
+    build: .
+    ports:
+      - "80:80"
+    volumes:
+      - ./data:/var/www/html
+      - ./conf/httpd/000-default.conf:/etc/apache2/sites-available/000-default.conf
+    networks:
+      - httpdphpfpm
+networks:
+  httpdphpfpm:
+    driver: bridge
